@@ -1,17 +1,15 @@
-const http = require("http");
 const express = require("express");
+const path = require("path");
+const dirPath = require("./utils/path");
 const app = express();
+const indexRoute = require("./routes/index");
 
-app.use("/add-product", (req, res, next) => {
-    res.send("<h1>Add product</h1>");
+app.use(express.static(path.join(__dirname, "public")));
 
-    // allows the request to continue to the next middleware
+app.use(indexRoute);
+
+app.use((res, req, next) => {
+    req.sendFile(path.join(dirPath, "views", "404.html"));
 });
 
-app.use("/", (req, res, next) => {
-    res.send("<h1>Hello from express</h1>");
-});
-
-const server = http.createServer(app);
-
-server.listen(3000);
+app.listen(3000);
