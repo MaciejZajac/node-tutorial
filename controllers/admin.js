@@ -42,8 +42,9 @@ exports.postEditProduct = (req, res) => {
     const updatedImageUrl = req.body.imageUrl;
     const updatedDesc = req.body.description;
     const updatedProduct = new Product(prodId, updatedTitle, updatedImageUrl, updatedPrice, updatedDesc);
-    updatedProduct.save();
-    res.redirect("/admin/products");
+    updatedProduct.save().then(() => {
+        res.redirect("/admin/products");
+    }).catch(err => console.log(err));
 }
 
 exports.postDeleteProduct = (req, res) => {
