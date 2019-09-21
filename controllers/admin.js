@@ -1,3 +1,4 @@
+const mongodb = require("mongodb");
 const Product = require("../models/product");
 
 exports.getAddProduct = (req, res) => {
@@ -10,7 +11,7 @@ exports.getAddProduct = (req, res) => {
 
 exports.postAddProduct = (req, res) => {
     const { title, imageUrl, price, description } = req.body;
-    const product = new Product(title, price, description, imageUrl);
+    const product = new Product(title, price, description, imageUrl, null, req.user._id);
     product
         .save()
         .then(result => {
@@ -25,11 +26,8 @@ exports.getEditProduct = (req, res) => {
         return res.redirect("/");
     }
     const prodId = req.params.productId;
-    req.user
-        .getProducts({ where: { id: prodId } })
-        // Product.findByPk(prodId)
-        .then(products => {
-            const product = products[0];
+    Product.findById(prodId)
+        .then(product => {
             if (!product) {
                 return res.redirect("/");
             }
@@ -43,48 +41,50 @@ exports.getEditProduct = (req, res) => {
         .catch(error => console.log(error));
 };
 
-// exports.postEditProduct = (req, res) => {
-//     const prodId = req.body.productId;
-//     const updatedTitle = req.body.title;
-//     const updatedPrice = req.body.price;
-//     const updatedImageUrl = req.body.imageUrl;
-//     const updatedDesc = req.body.description;
+exports.postEditProduct = (req, res) => {
+    const prodId = req.body.productId;
+    const updatedTitle = req.body.title;
+    const updatedPrice = req.body.price;
+    const updatedImageUrl = req.body.imageUrl;
+    const updatedDesc = req.body.description;
 
-//     Product.findByPk(prodId)
-//         .then(product => {
-//             product.title = updatedTitle;
-//             product.price = updatedPrice;
-//             product.updatedImageUrl = updatedImageUrl;
-//             product.description = updatedDesc;
-//             return product.save();
-//         })
-//         .then(result => {
-//             console.log("UPDATED PRODUCT!");
-//             res.redirect("/admin/products");
-//         })
-//         .catch(error => console.log(error));
-// };
+    const product = new Product(updatedTitle, updatedPrice, updatedDesc, updatedImageUrl, prodId);
 
-// exports.postDeleteProduct = (req, res) => {
-//     const prodId = req.body.productId;
-//     Product.findByPk(prodId)
-//         .then(product => product.destroy())
-//         .then(result => {
-//             console.log("DESTROYED PRODUCT");
-//             res.redirect("/admin/products");
-//         })
-//         .catch(err => console.log(err));
-// };
+    product
+        .save()
+        .then(() => {
+            res.redirect("/admin/products");
+        })
+        .catch(error => console.log(error));
+};
 
-// exports.getAdminProducts = (req, res) => {
-//     req.user
-//         .getProducts()
-//         .then(products => {
-//             res.render("admin/products", {
-//                 prods: products,
-//                 docTitle: "Admin Products",
-//                 path: "/admin/products"
-//             });
-//         })
-//         .catch(error => console.log("error", error));
-// };
+exports.postDeleteProduct = (req, res) => {
+    const prodId = req.body.productId;
+    Product.deleteById(prodId)
+        .then(() => {
+            res.redirect("/admin/products");
+        })
+        .catch(err => console.log(err));
+};
+
+exports.getAdminProducts = (req, res) => {
+    Product.fetchAll()
+        .then(products => {
+            res.render("admin/products", {
+                prods: products,
+                docTitle: "Admin Products",
+                path: "/admin/products"
+            });
+        })
+        .catch(err => console.log(err));
+    // req.user
+    //     .getProducts()
+    //     .then(products => {
+    //         res.render("admin/products", {
+    //             prods: products,
+    //             docTitle: "Admin Products",
+    //             path: "/admin/products"
+    //         });
+    //     })
+    //     .catch(error => console.log("error", error));
+};
