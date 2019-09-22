@@ -29,7 +29,7 @@ app.use("/admin", adminRouter);
 app.use(shopRoutes);
 app.use(errorController.get404);
 
-console.log(mongoConnect);
+// console.log(mongoConnect);
 mongoConnect(() => {
     app.listen(3000);
 });
