@@ -1,4 +1,5 @@
 const Product = require("../models/product");
+const Order = require("../models/order");
 
 exports.getProducts = (req, res, next) => {
     Product.find()
@@ -41,8 +42,11 @@ exports.getIndex = (req, res) => {
 
 exports.getCart = (req, res) => {
     req.user
-        .getCart()
-        .then(products => {
+        .populate("cart.items.productId")
+        .execPopulate()
+        .then(user => {
+            // console.log("products@@@@@", products);
+            const products = user.cart.items;
             res.render("shop/cart", {
                 docTitle: "Your Cart",
                 path: "/cart",
@@ -80,10 +84,10 @@ exports.postCart = (req, res) => {
         });
 };
 
-exports.postDeteleItem = (req, res) => {
+exports.postCartDeleteProduct = (req, res) => {
     const prodId = req.body.productId;
     req.user
-        .deleteItemFromCart(prodId)
+        .removeFromCart(prodId)
         .then(() => {
             res.redirect("/cart");
         })
@@ -91,9 +95,25 @@ exports.postDeteleItem = (req, res) => {
 };
 
 exports.postOrder = (req, res) => {
-    let fetchedCart;
     req.user
-        .addOrder()
+        .populate("cart.items.productId")
+        .execPopulate()
+        .then(user => {
+            const products = user.cart.items.map(i => {
+                return { quantity: i.quantity, product: { ...i.productId._doc } };
+            });
+            const order = new Order({
+                user: {
+                    name: req.user.name,
+                    userId: req.user
+                },
+                products
+            });
+            return order.save();
+        })
+        .then(() => {
+            return req.user.clearCart();
+        })
         .then(() => {
             res.redirect("/orders");
         })
@@ -101,8 +121,9 @@ exports.postOrder = (req, res) => {
 };
 
 exports.getOrders = (req, res) => {
-    req.user
-        .getOrders()
+    Order.find({
+        "user.userId": req.user._id
+    })
         .then(orders => {
             res.render("shop/orders", {
                 docTitle: "Your Orders",

@@ -88,7 +88,10 @@ exports.postDeleteProduct = (req, res) => {
 
 exports.getAdminProducts = (req, res) => {
     Product.find()
+        // .select("title price -_id")
+        // .populate("userId", "name")
         .then(products => {
+            console.log(products);
             res.render("admin/products", {
                 prods: products,
                 docTitle: "Admin Products",
@@ -96,14 +99,4 @@ exports.getAdminProducts = (req, res) => {
             });
         })
         .catch(err => console.log(err));
-    // req.user
-    //     .getProducts()
-    //     .then(products => {
-    //         res.render("admin/products", {
-    //             prods: products,
-    //             docTitle: "Admin Products",
-    //             path: "/admin/products"
-    //         });
-    //     })
-    //     .catch(error => console.log("error", error));
 };
