@@ -8,7 +8,8 @@ exports.getProducts = (req, res, next) => {
             res.render("shop/product-list", {
                 prods: products,
                 docTitle: "All products",
-                path: "/products"
+                path: "/products",
+                isAuthenticated: req.isLoggedIn
             });
         })
         .catch(err => console.log(err));
@@ -18,7 +19,12 @@ exports.getProduct = (req, res) => {
     const prodId = req.params.productId;
     Product.findById(prodId)
         .then(product => {
-            res.render("shop/product-detail", { product: product, docTitle: product.title, path: "/products" });
+            res.render("shop/product-detail", {
+                product: product,
+                docTitle: product.title,
+                path: "/products",
+                isAuthenticated: req.isLoggedIn
+            });
         })
         .catch(error => console.log(error));
     // Product.findByPk(prodId)
@@ -34,7 +40,8 @@ exports.getIndex = (req, res) => {
             res.render("shop/index", {
                 prods: products,
                 docTitle: "Shop",
-                path: "/"
+                path: "/",
+                isAuthenticated: req.isLoggedIn
             });
         })
         .catch(err => console.log(err));
@@ -50,7 +57,8 @@ exports.getCart = (req, res) => {
             res.render("shop/cart", {
                 docTitle: "Your Cart",
                 path: "/cart",
-                products: products
+                products: products,
+                isAuthenticated: req.isLoggedIn
             });
         })
         .catch(err => console.log(err));
@@ -128,7 +136,8 @@ exports.getOrders = (req, res) => {
             res.render("shop/orders", {
                 docTitle: "Your Orders",
                 path: "/orders",
-                orders: orders
+                orders: orders,
+                isAuthenticated: req.isLoggedIn
             });
         })
         .catch(err => console.log(err));
@@ -137,6 +146,7 @@ exports.getOrders = (req, res) => {
 exports.getCheckout = (req, res) => {
     res.render("shop/checkout", {
         docTitle: "Checkout",
-        path: "/checkout"
+        path: "/checkout",
+        isAuthenticated: req.isLoggedIn
     });
 };
