@@ -27,11 +27,6 @@ exports.getProduct = (req, res) => {
             });
         })
         .catch(error => console.log(error));
-    // Product.findByPk(prodId)
-    //     .then(product => {
-    //         res.render("shop/product-detail", { product: product, docTitle: product.title, path: "/products" });
-    //     })
-    //     .catch(error => console.log(error));
 };
 
 exports.getIndex = (req, res) => {
@@ -52,7 +47,6 @@ exports.getCart = (req, res) => {
         .populate("cart.items.productId")
         .execPopulate()
         .then(user => {
-            // console.log("products@@@@@", products);
             const products = user.cart.items;
             res.render("shop/cart", {
                 docTitle: "Your Cart",
@@ -62,23 +56,6 @@ exports.getCart = (req, res) => {
             });
         })
         .catch(err => console.log(err));
-    // Cart.getProducts(cart => {
-    //     Product.fetchAll(products => {
-    //         const cartProducts = [];
-    //         for (product of products) {
-    //             const cartProductData = cart.products.find(prod => prod.id === product.id);
-    //             if (cartProductData) {
-    //                 cartProducts.push({ productData: product, qty: cartProductData.qty });
-    //             }
-    //         }
-
-    //         res.render("shop/cart", {
-    //             docTitle: "Your Cart",
-    //             path: "/cart",
-    //             products: cartProducts
-    //         });
-    //     });
-    // });
 };
 
 exports.postCart = (req, res) => {

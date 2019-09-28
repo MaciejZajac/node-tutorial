@@ -35,7 +35,10 @@ app.use(
 );
 
 app.use((req, res, next) => {
-    User.findById("5d8921f01f0b3a3b4f55f0f1")
+    if (!req.session.user) {
+        return next();
+    }
+    User.findById(req.session.user._id)
         .then(user => {
             req.user = user;
             next();
@@ -48,7 +51,6 @@ app.use(shopRoutes);
 app.use(authRoutes);
 app.use(errorController.get404);
 
-// console.log(mongoConnect);
 mongoose
     .connect(MONGODB_URI)
     .then(result => {
