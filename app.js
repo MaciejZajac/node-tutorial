@@ -6,7 +6,7 @@ const session = require("express-session");
 const csrf = require("csurf");
 const MongoDBstore = require("connect-mongodb-session")(session);
 const errorController = require("./controllers/404");
-
+const flash = require("connect-flash");
 const MONGODB_URI = "mongodb+srv://maciej:132639@cluster0-m9slc.mongodb.net/shop";
 
 const app = express();
@@ -36,6 +36,7 @@ app.use(
     })
 );
 app.use(csrfProtection);
+app.use(flash());
 
 app.use((req, res, next) => {
     if (!req.session.user) {
@@ -50,7 +51,7 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
-    res.locals.isLoggedIn = req.session.isLoggedIn;
+    res.locals.isAuthenticated = req.session.isLoggedIn;
     res.locals.csrfToken = req.csrfToken();
     next();
 });

@@ -4,7 +4,7 @@ exports.getLogin = (req, res) => {
     res.render("auth/login", {
         docTitle: "Login",
         path: "/login",
-        isAuthenticated: false
+        errorMessage: req.flash("error")
     });
 };
 exports.postLogin = (req, res, next) => {
@@ -12,6 +12,7 @@ exports.postLogin = (req, res, next) => {
     User.findOne({ email })
         .then(user => {
             if (!user) {
+                req.flash("error", "Invalid email or password.");
                 return res.redirect("/login");
             }
             bcrypt
@@ -45,8 +46,7 @@ exports.postLogout = (req, res) => {
 exports.getSignup = (req, res, next) => {
     res.render("auth/signup", {
         path: "/signup",
-        docTitle: "Signup",
-        isAuthenticated: false
+        docTitle: "Signup"
     });
 };
 
