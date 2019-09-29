@@ -210,12 +210,15 @@ form {
 .user-message {
     margin: auto;
     width: 90%;
-    border: 1px solid blue;
-    padding: 15px;
+    border: 1px solid paleturquoise;
+    padding: 1rem;
+    border-radius: 3px;
+    text-align: center;
     background: lightblue;
 }
-.error-message--error {
+.user-message--error {
     color: red;
+    background-color: rgb(252, 164, 164);
 }
 @media (min-width: 768px) {
     .main-header__nav {
