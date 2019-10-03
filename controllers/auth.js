@@ -3,6 +3,7 @@ const sendgridTransport = require("nodemailer-sendgrid-transport");
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
+const { validationResult } = require("express-validator/check");
 
 const transporter = nodemailer.createTransport(
     sendgridTransport({
@@ -27,6 +28,16 @@ exports.getLogin = (req, res) => {
 };
 exports.postLogin = (req, res, next) => {
     const { email, password } = req.body;
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).render("auth/login", {
+            docTitle: "Login",
+            path: "/login",
+            errorMessage: errors.array()[0].msg
+        });
+    }
+
     User.findOne({ email })
         .then(user => {
             if (!user) {
@@ -63,28 +74,37 @@ exports.postLogout = (req, res) => {
 };
 
 exports.getSignup = (req, res, next) => {
+    let message = req.flash("error");
+    if (message.length > 0) {
+        message = message[0];
+    } else {
+        message = null;
+    }
     res.render("auth/signup", {
         path: "/signup",
-        docTitle: "Signup"
+        docTitle: "Signup",
+        errorMessage: message
     });
 };
 
 exports.postSignup = (req, res, next) => {
     const { email, password, confirmPassword } = req.body;
-    User.findOne({ email })
-        .then(userDoc => {
-            if (userDoc) {
-                req.flash("error", "This email already exits.");
-                return res.redirect("/signup");
-            }
-            return bcrypt.hash(password, 12).then(hashedpassword => {
-                const user = new User({ email: email, password: hashedpassword, cart: { items: [] } });
-                return user.save();
-            });
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).render("auth/signup", {
+            docTitle: "Signup",
+            path: "/signup",
+            errorMessage: errors.array()[0].msg
+        });
+    }
+    bcrypt
+        .hash(password, 12)
+        .then(hashedpassword => {
+            const user = new User({ email: email, password: hashedpassword, cart: { items: [] } });
+            return user.save();
         })
         .then(() => {
             res.redirect("/login");
-
             return transporter.sendMail({
                 to: email,
                 from: "shop@node-complete.com",
