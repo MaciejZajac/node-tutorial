@@ -1,10 +1,14 @@
 const Product = require("../models/product");
+const { validationResult } = require("express-validator/check");
 
 exports.getAddProduct = (req, res) => {
     res.render("admin/edit-product", {
         docTitle: "Add Product",
         path: "/admin/add-product",
-        editing: false
+        editing: false,
+        hasError: false,
+        errorMessage: undefined,
+        validationErrors: []
     });
 };
 
@@ -13,6 +17,26 @@ exports.postAddProduct = (req, res, next) => {
     const imageUrl = req.body.imageUrl;
     const price = req.body.price;
     const description = req.body.description;
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(422).render("admin/edit-product", {
+            docTitle: "Add product",
+            path: "/admin/edit-product",
+            errorMessage: errors.array()[0].msg,
+            editing: false,
+            hasError: true,
+            product: {
+                title,
+                imageUrl,
+                price,
+                description
+            },
+            validationErrors: errors.array()
+        });
+    }
+
     const product = new Product({
         title: title,
         price: price,
@@ -20,6 +44,7 @@ exports.postAddProduct = (req, res, next) => {
         imageUrl: imageUrl,
         userId: req.user
     });
+
     product
         .save()
         .then(result => {
@@ -45,7 +70,10 @@ exports.getEditProduct = (req, res) => {
                 docTitle: "Edit Product",
                 path: "/admin/edit-product",
                 editing: editMode,
-                product: product
+                product: product,
+                hasError: false,
+                errorMessage: undefined,
+                validationErrors: []
             });
         })
         .catch(error => console.log(error));
@@ -57,6 +85,26 @@ exports.postEditProduct = (req, res) => {
     const updatedPrice = req.body.price;
     const updatedImageUrl = req.body.imageUrl;
     const updatedDesc = req.body.description;
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(422).render("admin/edit-product", {
+            docTitle: "Edit product",
+            path: "/product",
+            editing: true,
+            hasError: true,
+            errorMessage: errors.array()[0].msg,
+            product: {
+                title: updatedTitle,
+                imageUrl: updatedImageUrl,
+                price: updatedPrice,
+                description: updatedDesc,
+                _id: prodId
+            },
+            validationErrors: errors.array()
+        });
+    }
 
     // const product = new Product(updatedTitle, updatedPrice, updatedDesc, updatedImageUrl, prodId);
     Product.findById(prodId)
