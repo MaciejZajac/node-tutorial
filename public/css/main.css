@@ -153,6 +153,7 @@ form {
     flex-wrap: wrap;
     justify-content: space-around;
     align-items: stretch;
+    margin-bottom: 25px;
 }
 
 .card {
@@ -221,6 +222,25 @@ form {
     color: red;
     background-color: rgb(252, 164, 164);
 }
+
+.pagination {
+    text-align: center;
+}
+
+.pagination a {
+    text-decoration: none;
+    color: #00695c;
+    padding: 0.5rem;
+    border: 1px solid #00695c;
+    margin: 0 1rem;
+}
+.pagination a:hover,
+.pagination a:active,
+.pagination a.active {
+    background: #00695c;
+    color: white;
+}
+
 @media (min-width: 768px) {
     .main-header__nav {
         display: flex;
