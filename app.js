@@ -6,6 +6,9 @@ const session = require("express-session");
 const csrf = require("csurf");
 const MongoDBstore = require("connect-mongodb-session")(session);
 const errorController = require("./controllers/404");
+const shopController = require("./controllers/shop");
+const isAuth = require("./middleware/is-auth");
+
 const flash = require("connect-flash");
 const multer = require("multer");
 const MONGODB_URI = "mongodb+srv://maciej:132639@cluster0-m9slc.mongodb.net/shop";
@@ -35,7 +38,6 @@ const fileStorate = multer.diskStorage({
     }
 });
 const fileFilter = (req, file, cb) => {
-    console.log("file.mimetype", file.mimetype);
     if (file.mimetype === "image/png" || file.mimetype === "image/jpg" || file.mimetype === "image/jpeg") {
         cb(null, true);
     } else {
@@ -55,14 +57,7 @@ app.use(
         store: store
     })
 );
-app.use(csrfProtection);
 app.use(flash());
-
-app.use((req, res, next) => {
-    res.locals.isAuthenticated = req.session.isLoggedIn;
-    res.locals.csrfToken = req.csrfToken();
-    next();
-});
 
 app.use((req, res, next) => {
     if (!req.session.user) {
@@ -78,6 +73,15 @@ app.use((req, res, next) => {
         });
 });
 
+app.post("/create-order", isAuth, shopController.postOrder);
+
+app.use(csrfProtection);
+
+app.use((error, req, res, next) => {
+    res.locals.csrfToken = req.csrfToken();
+    next();
+});
+
 app.use("/admin", adminRouter);
 app.use(shopRoutes);
 app.use(authRoutes);
@@ -86,7 +90,13 @@ app.use("/500", errorController.get500);
 app.use(errorController.get404);
 
 app.use((error, req, res, next) => {
-    res.redirect("/500");
+    // res.status(error.httpStatusCode).render(...);
+    // res.redirect('/500');
+    res.status(500).render("500", {
+        docTitle: "Error!",
+        path: "/500",
+        isAuthenticated: req.session.isLoggedIn
+    });
 });
 
 mongoose
