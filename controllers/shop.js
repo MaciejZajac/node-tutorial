@@ -134,8 +134,8 @@ exports.postCartDeleteProduct = (req, res) => {
 };
 
 exports.getCheckout = (req, res, next) => {
-    let products; // THIS WAS MOVED - had to put it here, to make it accessible by all then() blocks.
-    let total = 0; // THIS WAS MOVED - had to put it here, to make it accessible by all then() blocks.
+    let products;
+    let total = 0;
     req.user
         .populate("cart.items.productId")
         .execPopulate()
@@ -144,8 +144,8 @@ exports.getCheckout = (req, res, next) => {
             products.forEach(p => {
                 total += p.quantity * p.productId.price;
             });
+            console.log("123");
             return stripe.checkout.sessions.create({
-                // THIS WAS ADDED - configures a Stripe session
                 payment_method_types: ["card"],
                 line_items: products.map(p => {
                     return {
@@ -156,8 +156,8 @@ exports.getCheckout = (req, res, next) => {
                         quantity: p.quantity
                     };
                 }),
-                success_url: "http://localhost:3000/checkout/success", // THIS WAS ADDED
-                cancel_url: "http://localhost:3000/checkout/cancel" // THIS WAS ADDED
+                success_url: "http://localhost:3000/checkout/success",
+                cancel_url: "http://localhost:3000/checkout/cancel"
             });
         })
         .then(session => {
@@ -166,10 +166,11 @@ exports.getCheckout = (req, res, next) => {
                 docTitle: "Checkout",
                 products: products,
                 totalSum: total,
-                sessionId: session.id // THIS WAS ADDED - we need that in the checkout.ejs file (see above)
+                sessionId: session.id
             });
         })
         .catch(err => {
+            // console.log("kurwa", err);
             const error = new Error(err);
             error.httpStatusCode = 500;
             return next(error);
